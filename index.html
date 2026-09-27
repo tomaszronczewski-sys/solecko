@@ -17,8 +17,8 @@ input,select,textarea{box-sizing:border-box;width:100%;border-color:#d5ddd6!impo
 #mapControls{position:absolute;right:10px;top:10px;z-index:8;display:grid;gap:6px}
 #mapControls button{width:46px;height:46px;min-height:46px;padding:0;border-radius:12px;font-size:23px;font-weight:800;background:rgba(23,61,42,.92);box-shadow:0 2px 7px #0004}
 #zoomLabel{background:#fff;color:#173d2a;border-radius:9px;padding:4px 6px;font-size:11px;font-weight:800;text-align:center;box-shadow:0 1px 4px #0003}
-.spotMarker{position:absolute;transform:translate(-50%,-50%);z-index:6;border:0;background:#ffd75e;color:#173d2a;border-radius:50%;width:31px;height:31px;min-height:31px;padding:0;font-size:17px;box-shadow:0 1px 5px #0006}
-#spotLegend{position:absolute;left:8px;bottom:8px;z-index:7;background:rgba(255,255,255,.9);padding:6px 8px;border-radius:9px;font-size:11px;font-weight:700;color:#173d2a}
+
+
 </style>
 </head><body><header><h1>🎣 Solecko – dziennik brań</h1><div class='small' style='color:#dce9df'>GPS + dyktowanie + własne punkty</div></header>
 <div id='map' aria-label='Schemat Jeziora Solecko – stuknij, aby ustawić punkt ręcznie'>
@@ -41,7 +41,7 @@ input,select,textarea{box-sizing:border-box;width:100%;border-color:#d5ddd6!impo
 <button type='button' id='zoomOut' aria-label='Oddal mapę'>−</button>
 <button type='button' id='zoomReset' aria-label='Reset powiększenia'>↺</button>
 </div>
-<div id='spotLegend'>⭐ sugerowane miejsca</div></div>
+</div>
 <main><section class='card'><div class='row'><button id='gps'>📍 Pobierz GPS</button><button id='voice'>🎙️ Dyktuj wpis</button><button id='manual' class='secondary'>👆 Punkt z mapy</button></div><p id='status' class='status'>Na iPhonie otwórz tę stronę przez HTTPS i zezwól na lokalizację oraz mikrofon.</p><form id='form'><div class='row'><label>Godzina<input id='time' type='time'></label></div><div class='row'><label>Gatunek ryby<select id='species'><option value=''>— wybierz —</option><option>Szczupak</option><option>Okoń</option><option>Sandacz</option><option>Sum</option><option>Leszcz</option><option>Płoć</option><option>Lin</option><option>Karaś</option><option>Karp</option><option>Węgorz</option><option>Amur</option><option>Inna</option></select></label></div><div class='row'><label>Głębokość (m)<input id='depth' inputmode='decimal' placeholder='2,5'></label><label>Ryba (cm)<input id='size' inputmode='numeric' placeholder='65'></label></div><label>Przynęta<input id='lure' placeholder='np. guma 12 cm, zielona'></label><label>Zdjęcie ryby<input id='photo' type='file' accept='image/*'><img id='photoPreview' class='photoPreview' alt='Podgląd zdjęcia'></label><label>Notatka<textarea id='note' rows='3' placeholder='wiatr, roślinność, sposób prowadzenia…'></textarea></label><div class='small gps' id='coords'>GPS: brak</div><div class='row' style='margin-top:10px'><button type='submit'>Zapisz punkt</button><button type='button' id='export' class='secondary'>Eksport CSV</button></div></form></section><section class='card'><strong>Zapisane punkty</strong><div id='entries'><p class='status'>Brak wpisów.</p></div></section></main><div id='modal' class='modal'><div class='detail'><div id='detailBody'></div><button type='button' id='closeModal' class='secondary' style='margin-top:10px'>Zamknij</button></div></div>
 <script>
 const $=id=>document.getElementById(id), status=$('status'), map=$('map'), marks=$('marks');let pos=null,mapPos=null,entries=JSON.parse(localStorage.getItem('soleckoEntries')||'[]');$('time').value=new Date().toTimeString().slice(0,5);
@@ -74,22 +74,6 @@ map.addEventListener('pointerup',()=>dragStart=null);
 map.addEventListener('pointercancel',()=>dragStart=null);
 map.addEventListener('wheel',e=>{e.preventDefault();mapZoom=Math.max(1,Math.min(4,mapZoom+(e.deltaY<0?.2:-.2)));applyMapTransform()},{passive:false});
 
-const suggestedSpots=[
- {x:35,y:25,t:'⭐',name:'Spadek 3–4 m'},
- {x:59,y:39,t:'⭐',name:'Krawędź 5–6 m'},
- {x:51,y:70,t:'⭐',name:'Okolice wyspy'},
- {x:77,y:77,t:'⭐',name:'Wejście do zatoki'}
-];
-function renderSuggestedSpots(){
- suggestedSpots.forEach(o=>{
-   let b=document.createElement('button');b.type='button';b.className='spotMarker';b.textContent=o.t;
-   b.style.left=o.x+'%';b.style.top=o.y+'%';b.title=o.name;
-   b.onclick=ev=>{ev.stopPropagation();say('Sugerowane miejsce: '+o.name+'. To wskazówka na podstawie schematu, nie gwarancja obecności ryb.')};
-   marks.appendChild(b);
- });
-}
-const oldRender=render;
-render=function(){oldRender();renderSuggestedSpots();applyMapTransform()};
 
-render();
+render();applyMapTransform();
 </script></body></html>
